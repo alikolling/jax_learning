@@ -1,0 +1,124 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Research Template",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers-contrib/features/pre-commit:2": {
+			"version": "3.8.0"
+		},
+		"ghcr.io/devcontainers-contrib/features/apt-get-packages": {
+			"packages": [
+				"vim"
+			]
+		},
+		"ghcr.io/va-h/devcontainers-features/uv:1": {}
+	},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Configure tool-specific properties.
+	"customizations": {
+		// TODO: look into this one.
+		"codespaces": {},
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"[python]": {
+					"editor.codeActionsOnSave": {
+						"source.fixAll.ruff": "always",
+						"source.organizeImports.ruff": "explicit"
+					},
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.formatOnType": true
+				},
+				"editor.rulers": [
+					99
+				],
+				"editor.formatOnSave": true,
+				"files.exclude": {
+					"**/.git": true,
+					"**/.svn": true,
+					"**/.hg": true,
+					"**/CVS": true,
+					"**/.DS_Store": true,
+					"**/Thumbs.db": true,
+					// ADDED:
+					"**/__pycache__": true,
+					".mypy_cache": true,
+					".venv": true,
+					".pytest_cache": true,
+					".benchmarks": true,
+					".ruff_cache": true
+				},
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true,
+				"python.experiments.optOutFrom": [
+					"pythonTerminalEnvVarActivation"
+				],
+				"python.terminal.activateEnvInCurrentTerminal": false,
+				"python.terminal.activateEnvironment": true
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"charliermarsh.ruff",
+				"GitHub.copilot",
+				"knowsuchagency.pdm-task-provider",
+				"GitHub.copilot-chat",
+				"mutantdino.resourcemonitor",
+				"Gruntfuggly.todo-tree"
+			]
+		}
+	},
+	// create the cache dir on the host machine if it doesn exist yet so the mount below
+	// doesn't fail.
+	"initializeCommand": {
+		"create fake SLURM_TMPDIR": "mkdir -p ${SLURM_TMPDIR:-/tmp/slurm_tmpdir}", // this is fine on compute nodes
+		"create ssh cache dir": "mkdir -p ~/.cache/ssh", // Used to store the ssh sockets (from ControlPath directive).
+		"create uv cache dir": "mkdir -p ~/.cache/uv" // Used to store the ssh sockets (from ControlPath directive).
+	},
+	"containerEnv": {
+		"SCRATCH": "/home/vscode/scratch",
+		"SLURM_TMPDIR": "/tmp",
+		"UV_LINK_MODE": "symlink",
+		"UV_CACHE_DIR": "/home/vscode/.uv_cache"
+	},
+	"mounts": [
+		// https://code.visualstudio.com/remote/advancedcontainers/add-local-file-mount
+		// Mount a directory which will contain the pdm installation cache (shared with the host machine).
+		// Mount a "$SCRATCH" directory in the host to ~/scratch in the container.
+		"source=${localEnv:SCRATCH},target=/home/vscode/scratch,type=bind,consistency=cached",
+		// Mount $SLURM_TMPDIR on the host machine to /tmp/slurm_tmpdir in the container.
+		// note: there's also a SLURM_TMPDIR env variable set to /tmp/slurm_tmpdir in the container.
+		// NOTE: this assumes that either $SLURM_TMPDIR is set on the host machine (e.g. a compute node)
+		// or that `/tmp/slurm_tmpdir` exists on the host machine.
+		"source=${localEnv:SLURM_TMPDIR:/tmp/slurm_tmpdir},target=/tmp,type=bind,consistency=cached",
+		// Mount the ssh directory on the host machine to the container so we can use SSH in the
+		// same way as on the local machine.
+		"source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,readonly",
+		// Mount the ssh cache directory on the host machine to the container.
+		"source=${localEnv:HOME}/.cache/uv,target=/home/vscode/.uv_cache,type=bind,consistency=cached"
+	],
+	"runArgs": [
+		"--gpus", // COMMENT OUT IF YOUR LAPTOP DOES NOT HAVE A GPU!
+		"all", // COMMENT OUT IF YOUR LAPTOP DOES NOT HAVE A GPU!
+		"--ipc=host"
+	],
+	"onCreateCommand": {
+		"pre-commit": "pre-commit install --install-hooks"
+	},
+	"updateContentCommand": {
+		"Sync dependencies": "uv sync --locked"
+	},
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": {
+		// "pre-commit": "pre-commit install --install-hooks"
+		"git-autocomplete": "echo \"source /usr/share/bash-completion/completions/git\" >> ~/.bashrc"
+	}
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

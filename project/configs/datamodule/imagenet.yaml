@@ -1,5 +1,0 @@
-defaults:
-  - vision
-  - _self_
-_target_: project.datamodules.image_classification.imagenet.ImageNetDataModule
-# todo: add good configuration options here.

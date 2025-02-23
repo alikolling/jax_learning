@@ -1,0 +1,2 @@
+_target_: jax_learning.algorithms.jax_image_classifier.JaxCNN
+num_classes: ${instance_attr:datamodule.num_classes}

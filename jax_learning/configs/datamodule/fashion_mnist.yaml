@@ -1,0 +1,4 @@
+defaults:
+  - mnist
+  - _self_
+_target_: jax_learning.datamodules.image_classification.fashion_mnist.FashionMNISTDataModule

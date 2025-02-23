@@ -1,0 +1,18 @@
+# @package _global_
+
+defaults:
+  - override /algorithm: jax_ppo
+  - override /trainer: jax_trainer
+  - override /trainer/callbacks: rich_progress_bar
+  - override /datamodule: null
+  # - /trainer/logger: tensorboard
+trainer:
+  _convert_: object
+  max_epochs: 75
+  training_steps_per_epoch: 1
+  callbacks:
+    render_episodes:
+      _target_: jax_learning.algorithms.jax_ppo.RenderEpisodesCallback
+      on_every_epoch: false
+    # progress_bar:
+    #   _target_: lightning.pytorch.callbacks.progress.rich_progress.RichProgressBar

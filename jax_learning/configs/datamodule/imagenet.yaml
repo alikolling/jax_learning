@@ -1,0 +1,5 @@
+defaults:
+  - vision
+  - _self_
+_target_: jax_learning.datamodules.image_classification.imagenet.ImageNetDataModule
+# todo: add good configuration options here.
